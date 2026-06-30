@@ -34,7 +34,7 @@
         <div class="container container-tight py-4">
             <div class="text-center mb-4">
                 <a href="#" class="navbar-brand navbar-brand-autodark">
-                    <img src="{{ asset('assets/images/rillacumacrame.png') }}" height="120" alt="Rilla Logo" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">
+                    <img src="<?php echo e(asset('assets/images/rillacumacrame.png')); ?>" height="120" alt="Rilla Logo" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">
                 </a>
             </div>
 
@@ -43,27 +43,43 @@
                     <h2 class="h2 text-center mb-4" style="color: #6d4c41;">Pulihkan Password 🔑</h2>
                     <p class="text-center text-muted mb-4">Masukkan email terdaftar untuk menerima tautan atur ulang password baru.</p>
                     
-                    @if (session('status'))
+                    <?php if(session('status')): ?>
                         <div class="alert alert-success border-0 mb-4 text-center" style="background-color: #e8f5e9; color: #2e7d32; border-radius: 10px;">
-                            <i class="ti ti-circle-check me-2"></i> {{ session('status') }}
-                        </div>
-                    @endif
+                            <i class="ti ti-circle-check me-2"></i> <?php echo e(session('status')); ?>
 
-                    @if (session('error'))
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if(session('error')): ?>
                         <div class="alert alert-danger border-0 mb-4 text-center" style="background-color: #ffebee; color: #c62828; border-radius: 10px;">
-                            <i class="ti ti-circle-x me-2"></i> {{ session('error') }}
-                        </div>
-                    @endif
+                            <i class="ti ti-circle-x me-2"></i> <?php echo e(session('error')); ?>
 
-                    <form method="POST" action="{{ route('password.email') }}" autocomplete="off" novalidate>
-                        @csrf
+                        </div>
+                    <?php endif; ?>
+
+                    <form method="POST" action="<?php echo e(route('password.email')); ?>" autocomplete="off" novalidate>
+                        <?php echo csrf_field(); ?>
 
                         <div class="mb-4">
                             <label class="form-label">Alamat Email Pegawai</label>
-                            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" placeholder="nama@rilla-stock.com" value="{{ old('email') }}" required autofocus>
-                            @error('email')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <input type="email" name="email" class="form-control <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" placeholder="nama@rilla-stock.com" value="<?php echo e(old('email')); ?>" required autofocus>
+                            <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
 
                         <div class="form-footer">
@@ -71,7 +87,7 @@
                                 <i class="ti ti-mail-forward me-2"></i> Kirim Link Reset Password
                             </button>
                             <div class="text-center">
-                                <a href="{{ route('login') }}" class="text-accent text-decoration-none sm:text-xs"><i class="ti ti-arrow-left me-1"></i> Kembali ke Halaman Login</a>
+                                <a href="<?php echo e(route('login')); ?>" class="text-accent text-decoration-none sm:text-xs"><i class="ti ti-arrow-left me-1"></i> Kembali ke Halaman Login</a>
                             </div>
                         </div>
                     </form>
@@ -85,4 +101,4 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
 </body>
-</html>
+</html><?php /**PATH C:\laragon\www\rilla-stock\resources\views/auth/forgot-password.blade.php ENDPATH**/ ?>

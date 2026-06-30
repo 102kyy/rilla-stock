@@ -76,14 +76,18 @@
                                             <button class="btn btn-sm btn-icon btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modal-edit-{{ $pegawai->id }}">
                                                 <i class="ti ti-edit"></i>
                                             </button>
-                                            <button type="button" class="btn btn-sm btn-icon btn-outline-danger" onclick="confirmDelete({{ $pegawai->id }}, '{{ $pegawai->name }}')">
-                                                <i class="ti ti-trash"></i>
-                                            </button>
+                                            
+                                            {{-- PROTEKSI: Tombol hapus hanya muncul jika role BUKAN admin --}}
+                                            @if($pegawai->role !== 'admin')
+                                                <button type="button" class="btn btn-sm btn-icon btn-outline-danger" onclick="confirmDelete({{ $pegawai->id }}, '{{ $pegawai->name }}')">
+                                                    <i class="ti ti-trash"></i>
+                                                </button>
 
-                                            <form action="{{ route('user.destroy', $pegawai->id) }}" method="POST" id="delete-form-{{ $pegawai->id }}" class="d-none">
-                                                @csrf
-                                                @method('DELETE')
-                                            </form>
+                                                <form action="{{ route('user.destroy', $pegawai->id) }}" method="POST" id="delete-form-{{ $pegawai->id }}" class="d-none">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                </form>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>

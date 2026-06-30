@@ -7,12 +7,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\AkunPegawaiBaru;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
     public function index()
     {
-        // Mengambil semua user selain sistem internal jika ada, diurutkan paling baru
         $pegawais = User::orderBy('id', 'desc')->get();
         
         return view('management-usr.index', compact('pegawais'));
@@ -26,14 +29,24 @@ class UserController extends Controller
             'role' => ['required', 'string', Rule::in(['admin', 'pegawai'])],
         ]);
 
-        User::create([
+        $passwordAcak = Str::random(8);
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'role' => $request->role,
-            'password' => Hash::make('password123'), // Password default awal pegawai
+            'password' => Hash::make($passwordAcak),
         ]);
 
-        return redirect()->route('user.index')->with('success', 'Pegawai baru berhasil didaftarkan dengan password default: password123');
+        try {
+            Mail::to($user->email)->send(new AkunPegawaiBaru($user, $passwordAcak));
+            $pesanSukses = 'Pegawai baru berhasil didaftarkan dan detail login telah dikirim ke email mereka.';
+        } catch (\Exception $e) {
+            Log::error('Gagal mengirim email pegawai baru: ' . $e->getMessage());
+            
+            $pesanSukses = 'Pegawai berhasil didaftarkan, namun email gagal dikirim. Password acak mereka: ' . $passwordAcak;
+        }
+
+        return redirect()->route('user.index')->with('success', $pesanSukses);
     }
 
     public function update(Request $request, $id)
@@ -46,7 +59,6 @@ class UserController extends Controller
             'role' => ['required', 'string', Rule::in(['admin', 'pegawai'])],
         ]);
 
-        // Proteksi menggunakan Auth::id() agar tidak merah di editor
         if (Auth::id() === $user->id && $request->role !== 'admin') {
             return redirect()->back()->with('error', 'Kamu tidak bisa menurunkan tingkat hak akses akunmu sendiri!');
         }
@@ -63,10 +75,12 @@ class UserController extends Controller
     public function destroy($id)
     {
         $user = User::findOrFail($id);
-
-        // Proteksi menggunakan Auth::id()
+        
         if (Auth::id() === $user->id) {
             return redirect()->back()->with('error', 'Kamu tidak bisa menghapus akunmu sendiri!');
+        }
+        if ($user->role === 'admin') {
+            return redirect()->back()->with('error', 'Akun dengan tingkat akses Admin tidak diperbolehkan untuk dihapus!');
         }
 
         $user->delete();

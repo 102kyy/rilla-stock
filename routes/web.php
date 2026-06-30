@@ -11,6 +11,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\StokMasukController;
 use App\Http\Controllers\BahanBakuController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\ForgotPasswordController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -78,6 +79,13 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     Route::put('/manajemen-user/{id}', [UserController::class, 'update'])->name('user.update');
     Route::delete('/manajemen-user/{id}', [UserController::class, 'destroy'])->name('user.destroy');
 
-});
+    // Route Pemulihan Password Kustom (Bypass dari bajakan sistem internal Laravel)
+Route::get('forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+
+// Menggunakan password.custom_reset untuk menghindari pemblokiran otomatis dari middleware guest bawaan
+Route::get('atur-ulang-password/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.custom_reset');
+Route::post('atur-ulang-password', [ForgotPasswordController::class, 'resetPassword'])->name('password.update');
+    });
 
 require __DIR__.'/auth.php';
