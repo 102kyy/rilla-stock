@@ -21,12 +21,29 @@ class UserController extends Controller
         return view('management-usr.index', compact('pegawais'));
     }
 
+    // METHOD BARU: Mengambil data detail user untuk Modal via AJAX
+    public function show($id)
+    {
+        $user = User::findOrFail($id);
+        
+        // Mengembalikan format tanggal buatan yang lebih rapi
+        return response()->json([
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => ucfirst($user->role),
+            'created_at' => $user->created_at->translatedFormat('d F Y H:i'),
+        ]);
+    }
+
     public function store(Request $request)
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
+            // Ditambahkan validasi eksplisit unique:users,email untuk mencegah double email
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'role' => ['required', 'string', Rule::in(['admin', 'pegawai'])],
+        ], [
+            'email.unique' => 'Email ini sudah terdaftar di sistem Rilla-Stock!',
         ]);
 
         $passwordAcak = Str::random(8);

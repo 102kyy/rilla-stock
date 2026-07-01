@@ -2,106 +2,97 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Produk;
-use App\Models\Kategori;
+use App\Models\Kategori; // Pastikan model Kategori di-import jika ada
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use App\Exports\ProdukExport;
-use Maatwebsite\Excel\Facades\Excel;
-use Barryvdh\DomPDF\Facade\Pdf;
-
 
 class ProdukController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $kategori = Kategori::orderBy('nama_kategori', 'asc')->get();
+        $produk = Produk::with('kategori')->orderBy('id', 'desc')->get();
+        $kategori = Kategori::all();
         
-        $query = Produk::with('kategori');
-
-        if ($request->has('kategori') && $request->kategori != '') {
-            $query->where('kategori_id', $request->kategori);
-        }
-        $produk = $query->orderBy('id', 'desc')->get();
-
         return view('data_master.produk.index', compact('produk', 'kategori'));
+    }
+
+    public function show($id)
+    {
+        $produk = Produk::with('kategori')->findOrFail($id);
+        
+        return response()->json([
+            'nama_produk' => $produk->nama_produk,
+            'kategori'    => $produk->kategori->nama_kategori ?? '-',
+            'harga'       => 'Rp ' . number_format($produk->harga, 0, ',', '.'),
+            'stok_akhir'  => $produk->stok_akhir . ' Pcs',
+            'foto_url'    => $produk->foto_produk ? asset('storage/' . $produk->foto_produk) : null,
+
+        ]);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'kategori_id' => 'required|exists:kategori,id',
             'nama_produk' => 'required|string|max:255',
+            'kategori_id' => 'required|exists:kategoris,id',
             'harga'       => 'required|numeric|min:0',
-            'foto_produk' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', 
+            'foto_produk' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         $input = $request->all();
+        $input['stok_akhir'] = 0; // Default awal stok baru di-input adalah 0
+
         if ($request->hasFile('foto_produk')) {
-           
-            $path = $request->file('foto_produk')->store('foto-produk', 'public');
-            $input['foto_produk'] = $path;
+            $input['foto_produk'] = $request->file('foto_produk')->store('produk', 'public');
         }
 
         Produk::create($input);
 
-        return redirect()->route('produk.index')->with('success', 'Produk baru berhasil ditambahkan! 🧶');
+        return redirect()->route('produk.index')->with('success', 'Produk Macramé baru berhasil ditambahkan.');
     }
 
     public function update(Request $request, $id)
     {
+        $produk = Produk::findOrFail($id);
+
         $request->validate([
-            'kategori_id'  => 'required|exists:kategori,id',
-            'nama_produk'  => 'required|string|max:255',
-            'harga'        => 'required|numeric|min:0',
-            'foto_produk'  => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'tambah_stok'  => 'nullable|integer|min:0',
+            'nama_produk' => 'required|string|max:255',
+            'kategori_id' => 'required|exists:kategoris,id',
+            'harga'       => 'required|numeric|min:0',
+            'tambah_stok' => 'nullable|numeric|min:0',
+            'foto_produk' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        $produk = Produk::findOrFail($id);
         $input = $request->all();
-
-        if ($request->hasFile('foto_produk')) {
-            if ($produk->foto_produk && Storage::disk('public')->exists($produk->foto_produk)) {
-                Storage::disk('public')->delete($produk->foto_produk);
-            }
-            $path = $request->file('foto_produk')->store('foto-produk', 'public');
-            $input['foto_produk'] = $path;
+        
+        // Akumulasi stok lama dengan stok baru yang ditambahkan
+        if ($request->filled('tambah_stok')) {
+            $input['stok_akhir'] = $produk->stok_akhir + $request->tambah_stok;
         }
 
-        if ($request->filled('tambah_stok') && $request->tambah_stok > 0) {
-            $input['stok_akhir'] = $produk->stok_akhir + $request->tambah_stok;
+        if ($request->hasFile('foto_produk')) {
+            if ($produk->foto_produk) {
+                Storage::disk('public')->delete($produk->foto_produk);
+            }
+            $input['foto_produk'] = $request->file('foto_produk')->store('produk', 'public');
         }
 
         $produk->update($input);
 
-        return redirect()->route('produk.index')->with('success', 'Data produk dan stok berhasil diperbarui! ✨');
+        return redirect()->route('produk.index')->with('success', 'Data produk berhasil diperbarui.');
     }
 
     public function destroy($id)
     {
         $produk = Produk::findOrFail($id);
 
-        if ($produk->foto_produk && Storage::disk('public')->exists($produk->foto_produk)) {
+        if ($produk->foto_produk) {
             Storage::disk('public')->delete($produk->foto_produk);
         }
 
         $produk->delete();
 
-        return redirect()->route('produk.index')->with('success', 'Produk berhasil dihapus dari sistem! 🗑️');
-    }
-
-    public function exportExcel()
-    {
-        return Excel::download(new ProdukExport, 'Laporan_Produk_RillaMacrame.xlsx');
-    }
-
-    public function exportPdf()
-    {
-        $produks = Produk::with('kategori')->get();
-        $pdf = Pdf::loadView('pdf.produk', compact('produks'));
-        $pdf->setPaper('a4', 'portrait');
-        
-        return $pdf->stream('Laporan_Produk_RillaMacrame.pdf');
+        return redirect()->route('produk.index')->with('success', 'Produk berhasil dihapus dari sistem.');
     }
 }

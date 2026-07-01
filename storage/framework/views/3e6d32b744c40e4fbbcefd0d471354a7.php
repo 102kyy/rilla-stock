@@ -1,8 +1,8 @@
-@extends('layouts.app')
 
-@section('title', 'Manajemen User')
 
-@section('content')
+<?php $__env->startSection('title', 'Manajemen User'); ?>
+
+<?php $__env->startSection('content'); ?>
 <div class="page-header d-print-none">
     <div class="container-xl">
         <div class="row align-items-center mb-2">
@@ -26,42 +26,42 @@
     <div class="container-xl">
         <div class="row row-cards">
             <div class="col-12">
-                {{-- Alert Error Validation (Penting untuk deteksi jika Email Double saat submit) --}}
-                @if ($errors->any())
+                
+                <?php if($errors->any()): ?>
                     <div class="alert alert-danger alert-dismissible" role="alert">
                         <div class="d-flex">
                             <div><i class="ti ti-alert-triangle me-2"></i></div>
                             <div>
                                 <ul class="mb-0">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
+                                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <li><?php echo e($error); ?></li>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </ul>
                             </div>
                         </div>
                         <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
                     </div>
-                @endif
+                <?php endif; ?>
 
-                @if(session('success'))
+                <?php if(session('success')): ?>
                     <div class="alert alert-success alert-dismissible" role="alert">
                         <div class="d-flex">
                             <div><i class="ti ti-check me-2"></i></div>
-                            <div>{{ session('success') }}</div>
+                            <div><?php echo e(session('success')); ?></div>
                         </div>
                         <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
                     </div>
-                @endif
+                <?php endif; ?>
 
-                @if(session('error'))
+                <?php if(session('error')): ?>
                     <div class="alert alert-danger alert-dismissible" role="alert">
                         <div class="d-flex">
                             <div><i class="ti ti-alert-triangle me-2"></i></div>
-                            <div>{{ session('error') }}</div>
+                            <div><?php echo e(session('error')); ?></div>
                         </div>
                         <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
                     </div>
-                @endif
+                <?php endif; ?>
 
                 <div class="card" style="border-radius: 15px; border: none; box-shadow: 0 5px 15px rgba(186, 151, 120, 0.1);">
                     <div class="table-responsive">
@@ -76,50 +76,50 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($pegawais as $key => $pegawai)
+                                <?php $__empty_1 = true; $__currentLoopData = $pegawais; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $pegawai): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <tr>
-                                    <td>{{ $key + 1 }}</td>
-                                    <td class="fw-bold" style="color: #8d6e63;">{{ $pegawai->name }}</td>
-                                    <td class="text-muted">{{ $pegawai->email }}</td>
+                                    <td><?php echo e($key + 1); ?></td>
+                                    <td class="fw-bold" style="color: #8d6e63;"><?php echo e($pegawai->name); ?></td>
+                                    <td class="text-muted"><?php echo e($pegawai->email); ?></td>
                                     <td class="text-center">
-                                        @if($pegawai->role === 'admin')
+                                        <?php if($pegawai->role === 'admin'): ?>
                                             <span class="badge bg-amber-lt">Admin</span>
-                                        @else
+                                        <?php else: ?>
                                             <span class="badge bg-secondary-lt">Pegawai</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                     <td>
                                         <div class="btn-list flex-nowrap justify-content-center">
-                                            {{-- TOMBOL DETAIL --}}
-                                            <button class="btn btn-sm btn-icon btn-outline-info btn-detail" data-id="{{ $pegawai->id }}">
+                                            
+                                            <button class="btn btn-sm btn-icon btn-outline-info btn-detail" data-id="<?php echo e($pegawai->id); ?>">
                                                 <i class="ti ti-eye"></i>
                                             </button>
 
-                                            <button class="btn btn-sm btn-icon btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modal-edit-{{ $pegawai->id }}">
+                                            <button class="btn btn-sm btn-icon btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modal-edit-<?php echo e($pegawai->id); ?>">
                                                 <i class="ti ti-edit"></i>
                                             </button>
                                             
-                                            @if($pegawai->role !== 'admin')
-                                                <button type="button" class="btn btn-sm btn-icon btn-outline-danger" onclick="confirmDelete({{ $pegawai->id }}, '{{ $pegawai->name }}')">
+                                            <?php if($pegawai->role !== 'admin'): ?>
+                                                <button type="button" class="btn btn-sm btn-icon btn-outline-danger" onclick="confirmDelete(<?php echo e($pegawai->id); ?>, '<?php echo e($pegawai->name); ?>')">
                                                     <i class="ti ti-trash"></i>
                                                 </button>
 
-                                                <form action="{{ route('user.destroy', $pegawai->id) }}" method="POST" id="delete-form-{{ $pegawai->id }}" class="d-none">
-                                                    @csrf
-                                                    @method('DELETE')
+                                                <form action="<?php echo e(route('user.destroy', $pegawai->id)); ?>" method="POST" id="delete-form-<?php echo e($pegawai->id); ?>" class="d-none">
+                                                    <?php echo csrf_field(); ?>
+                                                    <?php echo method_field('DELETE'); ?>
                                                 </form>
-                                            @endif
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>
 
-                                {{-- MODAL EDIT --}}
-                                <div class="modal modal-blur fade" id="modal-edit-{{ $pegawai->id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                                
+                                <div class="modal modal-blur fade" id="modal-edit-<?php echo e($pegawai->id); ?>" tabindex="-1" role="dialog" aria-hidden="true">
                                     <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
                                         <div class="modal-content" style="border-radius: 15px;">
-                                            <form action="{{ route('user.update', $pegawai->id) }}" method="POST">
-                                                @csrf
-                                                @method('PUT')
+                                            <form action="<?php echo e(route('user.update', $pegawai->id)); ?>" method="POST">
+                                                <?php echo csrf_field(); ?>
+                                                <?php echo method_field('PUT'); ?>
                                                 <div class="modal-header" style="background-color: #fffaf5;">
                                                     <h5 class="modal-title" style="color: #6d4c41;">Edit Akses Pegawai</h5>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -127,14 +127,14 @@
                                                 <div class="modal-body">
                                                     <div class="mb-3">
                                                         <label class="form-label fw-bold">Nama Lengkap</label>
-                                                        <input type="text" name="name" class="form-control" value="{{ $pegawai->name }}" required>
+                                                        <input type="text" name="name" class="form-control" value="<?php echo e($pegawai->name); ?>" required>
                                                     </div>
                                                     <div class="mb-3">
                                                         <label class="form-label fw-bold">Email Resmi</label>
-                                                        <input type="email" name="email" class="form-control" value="{{ $pegawai->email }}" required>
+                                                        <input type="email" name="email" class="form-control" value="<?php echo e($pegawai->email); ?>" required>
                                                     </div>
 
-                                                    @include('management-usr.permission')
+                                                    <?php echo $__env->make('management-usr.permission', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
                                                 </div>
                                                 <div class="modal-footer">
@@ -146,11 +146,11 @@
                                     </div>
                                 </div>
 
-                                @empty
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
                                     <td colspan="5" class="text-center py-4 text-muted italic">Belum ada data pegawai terdaftar.</td>
                                 </tr>
-                                @endforelse
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -160,7 +160,7 @@
     </div>
 </div>
 
-{{-- MODAL DETAIL USER --}}
+
 <div class="modal modal-blur fade" id="modal-detail-pegawai" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
         <div class="modal-content" style="border-radius: 15px;">
@@ -196,12 +196,12 @@
     </div>
 </div>
 
-{{-- MODAL TAMBAH PEGAWAI --}}
+
 <div class="modal modal-blur fade" id="modal-pegawai" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
         <div class="modal-content" style="border-radius: 15px;">
-            <form action="{{ route('user.store') }}" method="POST">
-                @csrf
+            <form action="<?php echo e(route('user.store')); ?>" method="POST">
+                <?php echo csrf_field(); ?>
                 <div class="modal-header" style="background-color: #fffaf5;">
                     <h5 class="modal-title" style="color: #6d4c41;">Pegawai Baru</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -235,12 +235,12 @@
     </div>
 </div>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
     document.querySelectorAll('.btn-detail').forEach(button => {
         button.addEventListener('click', function() {
             const userId = this.getAttribute('data-id');
-            let urlTemplate = "{{ route('user.show', '__ID__') }}";
+            let urlTemplate = "<?php echo e(route('user.show', '__ID__')); ?>";
             let targetUrl = urlTemplate.replace('__ID__', userId);
             fetch(targetUrl)
                 .then(response => {
@@ -290,5 +290,6 @@
         })
     }
 </script>
-@endpush
-@endsection
+<?php $__env->stopPush(); ?>
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\rilla-stock\resources\views/management-usr/index.blade.php ENDPATH**/ ?>

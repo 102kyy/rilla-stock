@@ -50,6 +50,7 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     // Master Data: Produk
     Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
     Route::post('/produk/store', [ProdukController::class, 'store'])->name('produk.store');
+    Route::get('/produk/{id}', [ProdukController::class, 'show'])->name('produk.show');
     Route::put('/produk/update/{id}', [ProdukController::class, 'update'])->name('produk.update');
     Route::delete('/produk/hapus/{id}', [ProdukController::class, 'destroy'])->name('produk.destroy');
     Route::get('/produk/export/excel', [ProdukController::class, 'exportExcel'])->name('produk.export.excel');
@@ -76,6 +77,7 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     // Manajemen User / Pegawai
     Route::get('/manajemen-user', [UserController::class, 'index'])->name('user.index');
     Route::post('/manajemen-user/store', [UserController::class, 'store'])->name('user.store');
+    Route::get('/manajemen-user/{id}', [UserController::class, 'show'])->name('user.show');
     Route::put('/manajemen-user/{id}', [UserController::class, 'update'])->name('user.update');
     Route::delete('/manajemen-user/{id}', [UserController::class, 'destroy'])->name('user.destroy');
 
