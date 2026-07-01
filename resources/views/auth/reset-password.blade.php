@@ -49,8 +49,7 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('password.update') }}" autocomplete="off" novalidate>
-                        @csrf
+                        <form method="POST" action="{{ route('password.custom_update') }}" autocomplete="off" novalidate>                        @csrf
 
                         <input type="hidden" name="token" value="{{ $token ?? request()->route('token') }}">
 

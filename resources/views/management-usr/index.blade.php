@@ -26,7 +26,7 @@
     <div class="container-xl">
         <div class="row row-cards">
             <div class="col-12">
-                {{-- Alert Error Validation (Penting untuk deteksi jika Email Double saat submit) --}}
+                {{-- Alert Error Validation --}}
                 @if ($errors->any())
                     <div class="alert alert-danger alert-dismissible" role="alert">
                         <div class="d-flex">
@@ -88,28 +88,57 @@
                                             <span class="badge bg-secondary-lt">Pegawai</span>
                                         @endif
                                     </td>
-                                    <td>
-                                        <div class="btn-list flex-nowrap justify-content-center">
-                                            {{-- TOMBOL DETAIL --}}
-                                            <button class="btn btn-sm btn-icon btn-outline-info btn-detail" data-id="{{ $pegawai->id }}">
-                                                <i class="ti ti-eye"></i>
+                                    <td class="text-center">
+                                        <!-- DROPDOWN AKSI -->
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                Pilih Aksi
                                             </button>
-
-                                            <button class="btn btn-sm btn-icon btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modal-edit-{{ $pegawai->id }}">
-                                                <i class="ti ti-edit"></i>
-                                            </button>
-                                            
-                                            @if($pegawai->role !== 'admin')
-                                                <button type="button" class="btn btn-sm btn-icon btn-outline-danger" onclick="confirmDelete({{ $pegawai->id }}, '{{ $pegawai->name }}')">
-                                                    <i class="ti ti-trash"></i>
-                                                </button>
-
-                                                <form action="{{ route('user.destroy', $pegawai->id) }}" method="POST" id="delete-form-{{ $pegawai->id }}" class="d-none">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                </form>
-                                            @endif
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                {{-- MENU DETAIL --}}
+                                                <li>
+                                                    <button type="button" class="dropdown-item btn-detail" data-id="{{ $pegawai->id }}">
+                                                        <i class="ti ti-eye me-2 text-info"></i> Lihat Detail
+                                                    </button>
+                                                </li>
+                                                
+                                                {{-- MENU EDIT --}}
+                                                <li>
+                                                    <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#modal-edit-{{ $pegawai->id }}">
+                                                        <i class="ti ti-edit me-2 text-warning"></i> Edit Pegawai
+                                                    </button>
+                                                </li>
+                                                
+                                                {{-- MENU RESET PASSWORD (PANGGIL JS SWAL) --}}
+                                                <li>
+                                                    <button type="button" class="dropdown-item" onclick="confirmResetPassword({{ $pegawai->id }}, '{{ $pegawai->name }}')">
+                                                        <i class="ti ti-refresh me-2 text-orange"></i> Reset Password
+                                                    </button>
+                                                    <form method="POST" action="{{ route('admin.users.reset-password', $pegawai->id) }}" id="reset-form-{{ $pegawai->id }}" class="d-none">
+                                                        @csrf
+                                                        @method('PUT')
+                                                    </form>
+                                                </li>
+                                                
+                                                {{-- MENU HAPUS --}}
+                                                @if($pegawai->role !== 'admin')
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li>
+                                                        <button type="button" class="dropdown-item text-danger" onclick="confirmDelete({{ $pegawai->id }}, '{{ $pegawai->name }}')">
+                                                            <i class="ti ti-trash me-2"></i> Hapus Akses
+                                                        </button>
+                                                    </li>
+                                                @endif
+                                            </ul>
                                         </div>
+
+                                        {{-- Form Hidden untuk Delete --}}
+                                        @if($pegawai->role !== 'admin')
+                                            <form action="{{ route('user.destroy', $pegawai->id) }}" method="POST" id="delete-form-{{ $pegawai->id }}" class="d-none">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
+                                        @endif
                                     </td>
                                 </tr>
 
@@ -273,6 +302,25 @@
         });
     });
 
+    // SWAL UNTUK RESET PASSWORD (TERBARU)
+    function confirmResetPassword(id, name) {
+        Swal.fire({
+            title: 'Reset Password Pegawai?',
+            text: "Yakin ingin mereset password akun " + name + " menjadi default kembali (12345678)?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#fd7e14',
+            cancelButtonColor: '#ba9778',
+            confirmButtonText: 'Ya, reset!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('reset-form-' + id).submit();
+            }
+        })
+    }
+
+    // SWAL UNTUK DELETE
     function confirmDelete(id, name) {
         Swal.fire({
             title: 'Hapus Akses Pegawai?',

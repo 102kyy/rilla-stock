@@ -21,12 +21,10 @@ class UserController extends Controller
         return view('management-usr.index', compact('pegawais'));
     }
 
-    // METHOD BARU: Mengambil data detail user untuk Modal via AJAX
     public function show($id)
     {
         $user = User::findOrFail($id);
         
-        // Mengembalikan format tanggal buatan yang lebih rapi
         return response()->json([
             'name' => $user->name,
             'email' => $user->email,
@@ -103,4 +101,12 @@ class UserController extends Controller
         $user->delete();
         return redirect()->route('user.index')->with('success', 'User berhasil dihapus.');
     }
+
+    public function resetPasswordByAdmin(User $user)
+{
+    $user->password = '12345678'; 
+    $user->save();
+
+    return back()->with('status', "Password untuk {$user->name} berhasil direset menjadi: 12345678");
+}
 }

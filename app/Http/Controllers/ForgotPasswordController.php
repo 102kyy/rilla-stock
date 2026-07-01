@@ -49,6 +49,15 @@ class ForgotPasswordController extends Controller
 
     public function resetPassword(Request $request)
     {
+        dd([
+            'INFO' => 'Hooray! Kamu berhasil melihat isi form!',
+            'email_dari_form' => $request->input('email'),
+            'token_dari_form' => $request->input('token'),
+            'password_baru' => $request->input('password'),
+            'konfirmasi_password' => $request->input('password_confirmation'),
+            'semua_data_input' => $request->all()
+        ]);
+
         $request->validate([
             'token' => 'required',
             'email' => 'required|email|exists:users,email',
@@ -56,19 +65,16 @@ class ForgotPasswordController extends Controller
         ]);
 
         $record = DB::table('password_reset_tokens')->where('email', $request->email)->first();
-
-        // Validasi token kustom
         if (!$record || $record->token !== $request->token) {
             return back()->with('error', 'Token reset password tidak valid atau sudah kedaluwarsa.');
         }
 
-        User::query()->where('email', $request->email)->update([
-            'password' => Hash::make($request->password)
-        ]);
-
-        // Hapus token yang sudah terpakai
+        $user = User::query()->where('email', $request->email)->first();
+        if ($user) {
+            $user->password = $request->password; 
+            $user->save(); 
+        }
         DB::table('password_reset_tokens')->where('email', $request->email)->delete();
-
-        return redirect()->route('login')->with('status', 'Password kamu berhasil diperbarui! Silakan login dengan password baru.');
+        return redirect()->route('login')->with('status', 'Password kamu berhasil diperbarui!');
     }
 }

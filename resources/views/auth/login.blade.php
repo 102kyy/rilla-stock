@@ -64,11 +64,11 @@
                         <div class="mb-2">
                             <label class="form-label">
                                 Password
-                                <span class="form-label-description">
+                                {{-- <span class="form-label-description">
                                     @if (Route::has('password.request'))
                                         <a href="{{ route('password.request') }}" class="text-accent">Lupa password?</a>
                                     @endif
-                                </span>
+                                </span> --}}
                             </label>
                             <div class="input-group input-group-flat">
                                 <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" placeholder="masukkan password..." required>

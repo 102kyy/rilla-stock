@@ -29,7 +29,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
+    Route::put('/atur-ulang-password', [ProfileController::class, 'updatePassword'])->name('password.update');
+    
     // Transaksi Stok
     Route::resource('stok-masuk', StokMasukController::class);
     Route::resource('stok-keluar', StokKeluarController::class);
@@ -79,15 +80,14 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     Route::post('/manajemen-user/store', [UserController::class, 'store'])->name('user.store');
     Route::get('/manajemen-user/{id}', [UserController::class, 'show'])->name('user.show');
     Route::put('/manajemen-user/{id}', [UserController::class, 'update'])->name('user.update');
+    Route::put('/admin/users/{user}/reset-password', [\App\Http\Controllers\UserController::class, 'resetPasswordByAdmin'])->name('admin.users.reset-password');
     Route::delete('/manajemen-user/{id}', [UserController::class, 'destroy'])->name('user.destroy');
 
     // Route Pemulihan Password Kustom (Bypass dari bajakan sistem internal Laravel)
-Route::get('forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
-
-// Menggunakan password.custom_reset untuk menghindari pemblokiran otomatis dari middleware guest bawaan
-Route::get('atur-ulang-password/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.custom_reset');
-Route::post('atur-ulang-password', [ForgotPasswordController::class, 'resetPassword'])->name('password.update');
-    });
+    Route::get('forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::get('atur-ulang-password/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.custom_reset');
+    Route::post('atur-ulang-password', [ForgotPasswordController::class, 'resetPassword'])->name('password.custom_update');
+        });
 
 require __DIR__.'/auth.php';

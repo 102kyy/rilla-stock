@@ -97,11 +97,7 @@ unset($__errorArgs, $__bag); ?>
                         <div class="mb-2">
                             <label class="form-label">
                                 Password
-                                <span class="form-label-description">
-                                    <?php if(Route::has('password.request')): ?>
-                                        <a href="<?php echo e(route('password.request')); ?>" class="text-accent">Lupa password?</a>
-                                    <?php endif; ?>
-                                </span>
+                                
                             </label>
                             <div class="input-group input-group-flat">
                                 <input type="password" name="password" class="form-control <?php $__errorArgs = ['password'];

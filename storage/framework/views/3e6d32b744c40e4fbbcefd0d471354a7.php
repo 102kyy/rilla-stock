@@ -88,28 +88,57 @@
                                             <span class="badge bg-secondary-lt">Pegawai</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td>
-                                        <div class="btn-list flex-nowrap justify-content-center">
-                                            
-                                            <button class="btn btn-sm btn-icon btn-outline-info btn-detail" data-id="<?php echo e($pegawai->id); ?>">
-                                                <i class="ti ti-eye"></i>
+                                    <td class="text-center">
+                                        <!-- DROPDOWN AKSI -->
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                Pilih Aksi
                                             </button>
-
-                                            <button class="btn btn-sm btn-icon btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modal-edit-<?php echo e($pegawai->id); ?>">
-                                                <i class="ti ti-edit"></i>
-                                            </button>
-                                            
-                                            <?php if($pegawai->role !== 'admin'): ?>
-                                                <button type="button" class="btn btn-sm btn-icon btn-outline-danger" onclick="confirmDelete(<?php echo e($pegawai->id); ?>, '<?php echo e($pegawai->name); ?>')">
-                                                    <i class="ti ti-trash"></i>
-                                                </button>
-
-                                                <form action="<?php echo e(route('user.destroy', $pegawai->id)); ?>" method="POST" id="delete-form-<?php echo e($pegawai->id); ?>" class="d-none">
-                                                    <?php echo csrf_field(); ?>
-                                                    <?php echo method_field('DELETE'); ?>
-                                                </form>
-                                            <?php endif; ?>
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                
+                                                <li>
+                                                    <button type="button" class="dropdown-item btn-detail" data-id="<?php echo e($pegawai->id); ?>">
+                                                        <i class="ti ti-eye me-2 text-info"></i> Lihat Detail
+                                                    </button>
+                                                </li>
+                                                
+                                                
+                                                <li>
+                                                    <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#modal-edit-<?php echo e($pegawai->id); ?>">
+                                                        <i class="ti ti-edit me-2 text-warning"></i> Edit Pegawai
+                                                    </button>
+                                                </li>
+                                                
+                                                
+                                                <li>
+                                                    <button type="button" class="dropdown-item" onclick="confirmResetPassword(<?php echo e($pegawai->id); ?>, '<?php echo e($pegawai->name); ?>')">
+                                                        <i class="ti ti-refresh me-2 text-orange"></i> Reset Password
+                                                    </button>
+                                                    <form method="POST" action="<?php echo e(route('admin.users.reset-password', $pegawai->id)); ?>" id="reset-form-<?php echo e($pegawai->id); ?>" class="d-none">
+                                                        <?php echo csrf_field(); ?>
+                                                        <?php echo method_field('PUT'); ?>
+                                                    </form>
+                                                </li>
+                                                
+                                                
+                                                <?php if($pegawai->role !== 'admin'): ?>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li>
+                                                        <button type="button" class="dropdown-item text-danger" onclick="confirmDelete(<?php echo e($pegawai->id); ?>, '<?php echo e($pegawai->name); ?>')">
+                                                            <i class="ti ti-trash me-2"></i> Hapus Akses
+                                                        </button>
+                                                    </li>
+                                                <?php endif; ?>
+                                            </ul>
                                         </div>
+
+                                        
+                                        <?php if($pegawai->role !== 'admin'): ?>
+                                            <form action="<?php echo e(route('user.destroy', $pegawai->id)); ?>" method="POST" id="delete-form-<?php echo e($pegawai->id); ?>" class="d-none">
+                                                <?php echo csrf_field(); ?>
+                                                <?php echo method_field('DELETE'); ?>
+                                            </form>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
 
@@ -273,6 +302,25 @@
         });
     });
 
+    // SWAL UNTUK RESET PASSWORD (TERBARU)
+    function confirmResetPassword(id, name) {
+        Swal.fire({
+            title: 'Reset Password Pegawai?',
+            text: "Yakin ingin mereset password akun " + name + " menjadi default kembali (12345678)?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#fd7e14',
+            cancelButtonColor: '#ba9778',
+            confirmButtonText: 'Ya, reset!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('reset-form-' + id).submit();
+            }
+        })
+    }
+
+    // SWAL UNTUK DELETE
     function confirmDelete(id, name) {
         Swal.fire({
             title: 'Hapus Akses Pegawai?',
